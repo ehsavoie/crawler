@@ -5,12 +5,11 @@
 package org.wildfly.ai.document.parser;
 
 import dev.langchain4j.data.document.Metadata;
-import dev.langchain4j.data.segment.TextSegment;
 import java.util.ArrayList;
 import java.util.List;
 import org.jsoup.Jsoup;
 import static org.jsoup.internal.StringUtil.in;
-import org.jsoup.nodes.Document;
+import dev.langchain4j.data.document.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
@@ -24,12 +23,18 @@ import org.wildfly.ai.document.loader.WildFlyHtmlContent;
  * @author Emmanuel Hugonnet (c) 2024 Red Hat, Inc.
  */
 public class HtmlDocumentParser {
+    private final String selector;
+    private final String parentSelector;
 
-    public List<TextSegment> parsePage(WildFlyHtmlContent content, String cssSelector, String parentSelector) {
-        String selector = (cssSelector == null || cssSelector.isBlank()) ? "*" : cssSelector;
-        List<TextSegment> segments = new ArrayList<>();
+    public HtmlDocumentParser(String cssSelector, String parentSelector) {
+        this.selector = (cssSelector == null || cssSelector.isBlank()) ? "*" : cssSelector;
+        this.parentSelector = parentSelector;
+    }
+
+    public List<Document> parsePage(WildFlyHtmlContent content) {
+        List<Document> segments = new ArrayList<>();
         try {
-            Document htmlDoc = Jsoup.parse(content.getPath().toFile());
+            org.jsoup.nodes.Document htmlDoc = Jsoup.parse(content.getPath().toFile());
             Elements parents = htmlDoc.select(parentSelector + "," + selector);
             String title = htmlDoc.title();
             if (isStructured(htmlDoc, selector)) {
@@ -54,7 +59,7 @@ public class HtmlDocumentParser {
                                 break;
                             }
                         }
-                        segments.add(new TextSegment(text, metadata));
+                        segments.add(new dev.langchain4j.data.document.Document(text, metadata));
                     }
                 }
             }
@@ -65,9 +70,10 @@ public class HtmlDocumentParser {
         }
     }
 
-    private boolean isStructured(Document htmlDoc, String cssSelector) {
+    private boolean isStructured(org.jsoup.nodes.Document htmlDoc, String cssSelector) {
         return !htmlDoc.select(cssSelector).isEmpty();
     }
+
 
     private static class TextExtractingVisitor implements NodeVisitor {
 

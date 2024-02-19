@@ -7,6 +7,7 @@ package org.wildfly.ai;
 import org.wildfly.ai.document.loader.WildFlyHtmlContent;
 import crawlercommons.filters.basic.BasicURLNormalizer;
 import de.hshn.mi.crawler4j.frontier.HSQLDBFrontierConfiguration;
+import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.AllMiniLmL6V2EmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -42,16 +43,16 @@ public class Crawler {
         final String baseUrl = "https://docs.wildfly.org/";
         final int numCrawlers = 12;
         final List<WildFlyHtmlContent> contents = new ArrayList<>();
-        HtmlDocumentParser parser = new HtmlDocumentParser();
+        HtmlDocumentParser parser = new HtmlDocumentParser(".sect3", "h2");
         // Instantiate the controller for this crawl 
         CrawlController controller = createController("docs", baseUrl);
         CrawlController.WebCrawlerFactory<WildFlyDocsCrawler> factory = () -> new WildFlyDocsCrawler(basePath, baseUrl, contents);
         controller.start(factory, numCrawlers);
         controller.shutdown();
-        List<TextSegment> myDocs = new ArrayList<>(contents.size());
+        List<Document> myDocs = new ArrayList<>(contents.size());
 
         for (WildFlyHtmlContent content : contents) {
-            myDocs.addAll(parser.parsePage(content, ".sect3", "h2"));
+            myDocs.addAll(parser.parsePage(content));
         }
 
         contents.clear();
@@ -62,9 +63,9 @@ public class Crawler {
         controller.addSeed(wfBaseUrl);
         controller.start(factory, numCrawlers);
         controller.shutdown();
-
+        parser = new HtmlDocumentParser(".paragraph,.content", "h2");
         for (WildFlyHtmlContent content : contents) {
-            myDocs.addAll(parser.parsePage(content, ".paragraph,.content", "h2"));
+            myDocs.addAll(parser.parsePage(content));
         }
         /*EmbeddingModel embeddingModel = new OllamaEmbeddingModel.OllamaEmbeddingModelBuilder()
                 .baseUrl("http://ollama-mchomaredhatcom.apps.ai-hackathon.qic7.p1.openshiftapps.com")
@@ -72,10 +73,12 @@ public class Crawler {
                 .maxRetries(20)
                 .timeout(Duration.ofSeconds(500))
                 .build();*/
+       
         EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel();
-        EmbeddingStore<TextSegment> store= EmbeddingStoreFactory.createEmbeddingStore(myDocs, embeddingModel);
-        Path file= Paths.get("wildfly-embedding.json");
-        ((InMemoryEmbeddingStore)store).serializeToFile(file);
+
+        EmbeddingStore<TextSegment> store = EmbeddingStoreFactory.createEmbeddingStore(myDocs, embeddingModel);
+        Path file = Paths.get("wildfly-embedding.json");
+        ((InMemoryEmbeddingStore) store).serializeToFile(file);
         System.out.println("Embeddings stored into " + file.toAbsolutePath());
     }
 

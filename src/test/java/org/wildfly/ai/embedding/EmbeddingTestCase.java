@@ -5,15 +5,16 @@
 package org.wildfly.ai.embedding;
 
 import dev.langchain4j.chain.ConversationalRetrievalChain;
+import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.embedding.AllMiniLmL6V2EmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.input.PromptTemplate;
-import dev.langchain4j.model.ollama.OllamaChatModel;
+import dev.langchain4j.model.openai.OpenAiChatModel;
+import dev.langchain4j.model.openai.OpenAiChatModelName;
 import dev.langchain4j.rag.DefaultRetrievalAugmentor;
 import dev.langchain4j.rag.content.Content;
 import dev.langchain4j.rag.content.injector.DefaultContentInjector;
@@ -23,7 +24,6 @@ import dev.langchain4j.rag.query.Query;
 import dev.langchain4j.rag.query.router.DefaultQueryRouter;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import java.io.File;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,8 +50,8 @@ public class EmbeddingTestCase {
         WildFlyHtmlContent content = new WildFlyHtmlContent(new File("target").toPath().resolve("test-classes").resolve("admin_guide.html"), "en", "https://docs.wildfly.org/31/Admin_Guide.html", "https://docs.wildfly.org/31/");
         String cssSelector = ".sect3";
         String parentSelector = "h2";
-        HtmlDocumentParser instance = new HtmlDocumentParser();
-        List<TextSegment> result = instance.parsePage(content, cssSelector, parentSelector);
+        HtmlDocumentParser instance = new HtmlDocumentParser(cssSelector, parentSelector);
+        List<Document> result = instance.parsePage(content);
         assertEquals(190, result.size());
         EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel();
 
@@ -76,21 +76,22 @@ public class EmbeddingTestCase {
 
 //        String ollamaUrl = "http://ollama-mchomaredhatcom.apps.ai-hackathon.qic7.p1.openshiftapps.com";
 //        String modelName = "7b-text-q2_Kchat";
-        ChatLanguageModel model = OllamaChatModel.builder()
-                .baseUrl(ollamaUrl)
-                .modelName(modelName)
-                .timeout(Duration.ofSeconds(210))
-                .build();
-
-//        ChatLanguageModel model = OpenAiChatModel
-//                .builder()
-//                .apiKey(OPENAI_KEY)
-//                .maxRetries(5)
-//                .modelName(OpenAiChatModelName.GPT_3_5_TURBO)
-//                .logRequests(Boolean.TRUE)
-//                .logResponses(Boolean.TRUE)
+//        ChatLanguageModel model = OllamaChatModel.builder()
+//                .baseUrl(ollamaUrl)
+//                .modelName(modelName)
+//                .timeout(Duration.ofSeconds(240))
 //                .build();
-        String question = "How do I set up a ConnectionFactory to a remote jms broker ?";
+
+        ChatLanguageModel model = OpenAiChatModel
+                .builder()
+                .apiKey("demo")
+                .maxRetries(5)
+                .modelName(OpenAiChatModelName.GPT_3_5_TURBO)
+                .logRequests(Boolean.TRUE)
+                .logResponses(Boolean.TRUE)
+                .maxTokens(1000)
+                .build();
+        String question = "How do I set up a ConnectionFactory to a remote broker ?";
         List<Content> ragContents = contentRetriever.retrieve(Query.from(question));
 
         List<ChatMessage> messages = new ArrayList<>();
@@ -111,6 +112,14 @@ public class EmbeddingTestCase {
                 + "---"
                 + "\n Here is a few data to help you:\n"
                 + "";
+        String promptTemplate2 = "You are a wildfly expert who understands well how to administrate the wildfly server and its components\n"
+                + "Objective: answer the user question delimited by  ---\n"
+                + "\n"
+                + "---\n"
+                + "{{userMessage}}\n"
+                + "---"
+                + "\n Here is a few data to help you:\n"
+                + "{{contents}}";
         String basePrompt = String.format(completePrompt, question);
         StringBuilder messageBuilder = new StringBuilder(basePrompt);
         for (Content ragContent : ragContents) {
@@ -119,16 +128,15 @@ public class EmbeddingTestCase {
 
         ConversationalRetrievalChain chain = ConversationalRetrievalChain.builder()
                 .chatLanguageModel(model)
-                .contentRetriever(contentRetriever)
                 .retrievalAugmentor(DefaultRetrievalAugmentor.builder()
                         .contentInjector(DefaultContentInjector.builder()
-                                .promptTemplate(PromptTemplate.from(promptTemplate))
+                                .promptTemplate(PromptTemplate.from(promptTemplate2))
                                 .build())
                         .queryRouter(new DefaultQueryRouter(contentRetriever))
                         .build())
                 .build();
         System.out.println("Answer from chain " + chain.execute(question));
-        System.out.println("Answer from model " + model.generate(systemMessage, UserMessage.from(messageBuilder.toString().substring(0, 4096))).content().text());
+//        System.out.println("Answer from model " + model.generate(systemMessage, UserMessage.from(messageBuilder.toString().substring(0, 4096))).content().text());
 
     }
 
