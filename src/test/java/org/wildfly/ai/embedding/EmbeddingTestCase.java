@@ -23,7 +23,10 @@ import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
 import dev.langchain4j.rag.query.Query;
 import dev.langchain4j.rag.query.router.DefaultQueryRouter;
 import dev.langchain4j.store.embedding.EmbeddingStore;
+import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -91,7 +94,7 @@ public class EmbeddingTestCase {
                 .logResponses(Boolean.TRUE)
                 .maxTokens(1000)
                 .build();
-        String question = "How do I set up a ConnectionFactory to a remote broker ?";
+        String question = "How do I set up a ConnectionFactory to a remote JMS broker ?";
         List<Content> ragContents = contentRetriever.retrieve(Query.from(question));
 
         List<ChatMessage> messages = new ArrayList<>();
@@ -135,9 +138,72 @@ public class EmbeddingTestCase {
                         .queryRouter(new DefaultQueryRouter(contentRetriever))
                         .build())
                 .build();
-        System.out.println("Answer from chain " + chain.execute(question));
+        System.out.println("Answer from chain:\n" + chain.execute(question));
+        Path file = Paths.get("wildfly-admin-embeddings.json");
+        ((InMemoryEmbeddingStore) store).serializeToFile(file);
+        System.out.println("Embeddings stored into " + file.toAbsolutePath());
+        InMemoryEmbeddingStore.fromFile(file);
 //        System.out.println("Answer from model " + model.generate(systemMessage, UserMessage.from(messageBuilder.toString().substring(0, 4096))).content().text());
 
+    }
+
+    
+    /**
+     * Test of parsePage method, of class HtmlDocumentParser.
+     */
+    @Test
+    public void testFullEmbeddings() {
+        EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel();
+        EmbeddingStore<TextSegment> store = EmbeddingStoreFactory.loadEmbeddingStore(
+        new File("target").toPath().resolve("test-classes").resolve("wildfly-embedding.json"));
+        ContentRetriever contentRetriever = EmbeddingStoreContentRetriever.builder()
+                .embeddingStore(store)
+                .embeddingModel(embeddingModel)
+                .maxResults(2) // on each interaction we will retrieve the 2 most relevant segments
+                .minScore(0.5) // we want to retrieve segments at least somewhat similar to user query
+                .build();
+        ChatLanguageModel model = OpenAiChatModel
+                .builder()
+                .apiKey("demo")
+                .maxRetries(5)
+                .modelName(OpenAiChatModelName.GPT_3_5_TURBO)
+                .logRequests(Boolean.TRUE)
+                .logResponses(Boolean.TRUE)
+                .maxTokens(1000)
+                .build();
+        String question = "How do I set up a ConnectionFactory to a remote JMS broker ?";
+        List<Content> ragContents = contentRetriever.retrieve(Query.from(question));
+        String completePrompt = "Objective: answer the user question delimited by  ---\n"
+                + "\n"
+                + "---\n"
+                + "%s\n"
+                + "---"
+                + "\n Here is a few data to help you:\n"
+                + "";
+        String promptTemplate2 = "You are a wildfly expert who understands well how to administrate the wildfly server and its components\n"
+                + "Objective: answer the user question delimited by  ---\n"
+                + "\n"
+                + "---\n"
+                + "{{userMessage}}\n"
+                + "---"
+                + "\n Here is a few data to help you:\n"
+                + "{{contents}}";
+        String basePrompt = String.format(completePrompt, question);
+        StringBuilder messageBuilder = new StringBuilder(basePrompt);
+        for (Content ragContent : ragContents) {
+            messageBuilder.append(ragContent.textSegment().text());
+        }
+
+        ConversationalRetrievalChain chain = ConversationalRetrievalChain.builder()
+                .chatLanguageModel(model)
+                .retrievalAugmentor(DefaultRetrievalAugmentor.builder()
+                        .contentInjector(DefaultContentInjector.builder()
+                                .promptTemplate(PromptTemplate.from(promptTemplate2))
+                                .build())
+                        .queryRouter(new DefaultQueryRouter(contentRetriever))
+                        .build())
+                .build();
+        System.out.println("Answer from chain with full embeddings:\n" + chain.execute(question));
     }
 
 }

@@ -31,7 +31,6 @@ public class HtmlDocumentParserTest {
         HtmlDocumentParser instance = new HtmlDocumentParser(cssSelector, parentSelector);
         List<Document> result = instance.parsePage(content);
         assertEquals(50, result.size());
-        System.out.println(result.get(4));
     }
 
     @Test
@@ -46,7 +45,6 @@ public class HtmlDocumentParserTest {
         instance = new HtmlDocumentParser(cssSelector, parentSelector);
         result = instance.parsePage(content);
         assertEquals(6, result.size());
-        System.out.println(result.get(3));
     }
 
 }

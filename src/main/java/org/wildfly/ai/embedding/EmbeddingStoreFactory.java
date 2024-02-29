@@ -11,6 +11,7 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -28,5 +29,9 @@ public class EmbeddingStoreFactory {
                 .build();
         ingestor.ingest(documents);
         return embeddingStore;
+    }
+
+    public static EmbeddingStore<TextSegment> loadEmbeddingStore(Path filePath) {
+        return InMemoryEmbeddingStore.fromFile(filePath);
     }
 }
