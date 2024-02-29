@@ -56,17 +56,17 @@ public class Crawler {
         }
 
         contents.clear();
-        final Path wfBasePath = rootFolder.resolve("www");
-        final String wfBaseUrl = "https://www.wildfly.org/";
-        factory = () -> new WildFlyDocsCrawler(wfBasePath, wfBaseUrl, contents);
-        controller = createController("www", wfBaseUrl);
-        controller.addSeed(wfBaseUrl);
-        controller.start(factory, numCrawlers);
-        controller.shutdown();
-        parser = new HtmlDocumentParser(".paragraph,.content", "h2");
-        for (WildFlyHtmlContent content : contents) {
-            myDocs.addAll(parser.parsePage(content));
-        }
+//        final Path wfBasePath = rootFolder.resolve("www");
+//        final String wfBaseUrl = "https://www.wildfly.org/";
+//        factory = () -> new WildFlyDocsCrawler(wfBasePath, wfBaseUrl, contents);
+//        controller = createController("www", wfBaseUrl);
+//        controller.addSeed(wfBaseUrl);
+//        controller.start(factory, numCrawlers);
+//        controller.shutdown();
+//        parser = new HtmlDocumentParser(".paragraph,.content", "h2");
+//        for (WildFlyHtmlContent content : contents) {
+//            myDocs.addAll(parser.parsePage(content));
+//        }
         /*EmbeddingModel embeddingModel = new OllamaEmbeddingModel.OllamaEmbeddingModelBuilder()
                 .baseUrl("http://ollama-mchomaredhatcom.apps.ai-hackathon.qic7.p1.openshiftapps.com")
                 .modelName("mistral:latest")
@@ -77,7 +77,7 @@ public class Crawler {
         EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel();
 
         EmbeddingStore<TextSegment> store = EmbeddingStoreFactory.createEmbeddingStore(myDocs, embeddingModel);
-        Path file = Paths.get("wildfly-embedding.json");
+        Path file = Paths.get("docs-wildfly-embedding.json");
         ((InMemoryEmbeddingStore) store).serializeToFile(file);
         System.out.println("Embeddings stored into " + file.toAbsolutePath());
     }
