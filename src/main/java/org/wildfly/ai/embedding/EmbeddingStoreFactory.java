@@ -11,7 +11,10 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
+import dev.langchain4j.store.embedding.weaviate.WeaviateEmbeddingStore;
+import io.weaviate.client.v1.schema.model.Property;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,18 +22,48 @@ import java.util.List;
  * @author Emmanuel Hugonnet (c) 2024 Red Hat, Inc.
  */
 public class EmbeddingStoreFactory {
-
+    
     public static EmbeddingStore<TextSegment> createEmbeddingStore(List<Document> documents, EmbeddingModel embeddingModel) {
         EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
         EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
-                .documentSplitter(DocumentSplitters.recursive(1500, 500))
+                .documentSplitter(DocumentSplitters.recursive(500, 100))
                 .embeddingModel(embeddingModel)
                 .embeddingStore(embeddingStore)
                 .build();
         ingestor.ingest(documents);
         return embeddingStore;
     }
-
+    /**
+     * rm -Rf /home/ehugonne/.local/share/containers/storage/volumes/weaviate/_data/*
+     * podman run --rm -p 8090:8080 -p 50051:50051 -v /home/ehugonne/\.local/share/containers/storage/volumes/weaviate/_data:/data --name=weaviate cr.weaviate.io/semitechnologies/weaviate:1.24.
+     * @param documents
+     * @param embeddingModel
+     * @param metadata
+     * @return 
+     */
+    public static EmbeddingStore<TextSegment> createWeaviateEmbeddingStore(List<Document> documents, EmbeddingModel embeddingModel, List<String> metadata) {
+        List<Property> properties = new ArrayList<>();
+        for(String meta : metadata) {
+            properties.add(Property.builder().name(meta).build());
+        }
+        EmbeddingStore<TextSegment> embeddingStore = WeaviateEmbeddingStore.builder()
+                .scheme("http")
+                .host("localhost")
+                .port(8090)
+                .objectClass("MyGreatClass")
+                .properties(properties)
+                .avoidDups(true)
+                .consistencyLevel("ALL")
+                .build();
+        EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
+                .documentSplitter(DocumentSplitters.recursive(500, 100))
+                .embeddingModel(embeddingModel)
+                .embeddingStore(embeddingStore)
+                .build();
+        ingestor.ingest(documents);
+        return embeddingStore;
+    }
+    
     public static EmbeddingStore<TextSegment> loadEmbeddingStore(Path filePath) {
         return InMemoryEmbeddingStore.fromFile(filePath);
     }
