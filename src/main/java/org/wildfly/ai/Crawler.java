@@ -12,6 +12,7 @@ import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.AllMiniLmL6V2EmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
+import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
@@ -20,6 +21,7 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import org.wildfly.ai.crawler.WildFlyDocsCrawler;
@@ -74,11 +76,11 @@ public class Crawler {
        
         EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel();
 
-//        EmbeddingStore<TextSegment> store = EmbeddingStoreFactory.createEmbeddingStore(myDocs, embeddingModel);
-//        Path file = Paths.get("docs-wildfly-embedding.json");
-//        ((InMemoryEmbeddingStore) store).serializeToFile(file);
-//        System.out.println("Embeddings stored into " + file.toAbsolutePath());
-        EmbeddingStore<TextSegment>  store = EmbeddingStoreFactory.createWeaviateEmbeddingStore(myDocs, embeddingModel,
+        /*EmbeddingStore<TextSegment> store = EmbeddingStoreFactory.createEmbeddingStore(myDocs, embeddingModel);
+        Path file = Paths.get("docs-wildfly-embedding.json");
+        ((InMemoryEmbeddingStore) store).serializeToFile(file);
+        System.out.println("Embeddings stored into " + file.toAbsolutePath());*/
+        EmbeddingStore<TextSegment> store = EmbeddingStoreFactory.createWeaviateEmbeddingStore(myDocs, embeddingModel,
                 List.of("url", "language", "parent_url", "file_name", "file_path"));
     }
 

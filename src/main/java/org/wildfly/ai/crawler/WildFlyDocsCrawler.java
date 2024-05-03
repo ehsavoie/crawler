@@ -44,7 +44,7 @@ public class WildFlyDocsCrawler extends WebCrawler {
     public WildFlyDocsCrawler(Path basePath, String baseUrl, List<WildFlyHtmlContent> content) {
         this.basePath = basePath;
         this.baseUrl = baseUrl;
-        this.filter = Pattern.compile(baseUrl + "([1-9](\\.1)(\\.2)??|1[0-9](\\.1)?|2[0-9](\\.1)?|3[0])/.*");
+        this.filter = Pattern.compile(baseUrl + "([1-9](\\.1)(\\.2)??|1[0-9](\\.1)?|2[0-9](\\.1)?|3[0-1])/.*");
         this.content = content;
     }
 
@@ -84,7 +84,7 @@ public class WildFlyDocsCrawler extends WebCrawler {
             content.add(new WildFlyHtmlContent(
                     createdPath,
                     page.getLanguage(),
-                    page.getWebURL().getURL().toLowerCase(Locale.ENGLISH),
+                    page.getWebURL().getURL(),
                     page.getWebURL().getParentUrl()));
         } catch (IOException ex) {
             logger.error("Error processing URL: {} which lead to {}", page.getWebURL().getURL(), path, ex);

@@ -50,8 +50,7 @@ public class EmbeddingStoreFactory {
                 .scheme("http")
                 .host("localhost")
                 .port(8090)
-                .objectClass("MyGreatClass")
-                .properties(properties)
+                .objectClass("simple")
                 .avoidDups(true)
                 .consistencyLevel("ALL")
                 .build();
