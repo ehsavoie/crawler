@@ -76,10 +76,11 @@ public class Crawler {
        
         EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel();
 
-        /*EmbeddingStore<TextSegment> store = EmbeddingStoreFactory.createEmbeddingStore(myDocs, embeddingModel);
+        EmbeddingStore<TextSegment> jsonStore = EmbeddingStoreFactory.createEmbeddingStore(myDocs, embeddingModel);
         Path file = Paths.get("docs-wildfly-embedding.json");
-        ((InMemoryEmbeddingStore) store).serializeToFile(file);
-        System.out.println("Embeddings stored into " + file.toAbsolutePath());*/
+        ((InMemoryEmbeddingStore) jsonStore).serializeToFile(file);
+        System.out.println("Embeddings stored into " + file.toAbsolutePath());
+        //Filling weaviate
         EmbeddingStore<TextSegment> store = EmbeddingStoreFactory.createWeaviateEmbeddingStore(myDocs, embeddingModel,
                 List.of("url", "language", "parent_url", "file_name", "file_path"));
     }
