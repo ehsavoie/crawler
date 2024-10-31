@@ -12,9 +12,7 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import dev.langchain4j.store.embedding.weaviate.WeaviateEmbeddingStore;
-import io.weaviate.client.v1.schema.model.Property;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,17 +40,14 @@ public class EmbeddingStoreFactory {
      * @return 
      */
     public static EmbeddingStore<TextSegment> createWeaviateEmbeddingStore(List<Document> documents, EmbeddingModel embeddingModel, List<String> metadata) {
-        List<Property> properties = new ArrayList<>();
-        for(String meta : metadata) {
-            properties.add(Property.builder().name(meta).build());
-        }
         EmbeddingStore<TextSegment> embeddingStore = WeaviateEmbeddingStore.builder()
                 .scheme("http")
                 .host("localhost")
                 .port(8090)
-                .objectClass("simple")
+                .objectClass("Simple")
                 .avoidDups(true)
                 .consistencyLevel("ALL")
+                .metadataKeys(metadata)
                 .build();
         EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
                 .documentSplitter(DocumentSplitters.recursive(500, 100))

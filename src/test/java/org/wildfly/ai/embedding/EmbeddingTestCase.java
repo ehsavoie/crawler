@@ -10,7 +10,6 @@ import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.embedding.AllMiniLmL6V2EmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.openai.OpenAiChatModel;
@@ -29,7 +28,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import dev.langchain4j.model.embedding.onnx.allminilml6v2.AllMiniLmL6V2EmbeddingModel;
 import org.junit.jupiter.api.Test;
 import org.wildfly.ai.document.loader.WildFlyHtmlContent;
 import org.wildfly.ai.document.parser.HtmlDocumentParser;
@@ -89,7 +91,7 @@ public class EmbeddingTestCase {
                 .builder()
                 .apiKey("demo")
                 .maxRetries(5)
-                .modelName(OpenAiChatModelName.GPT_3_5_TURBO)
+                .modelName(OpenAiChatModelName.GPT_4_O_MINI)
                 .logRequests(Boolean.TRUE)
                 .logResponses(Boolean.TRUE)
                 .maxTokens(1000)
@@ -166,7 +168,7 @@ public class EmbeddingTestCase {
                 .builder()
                 .apiKey("demo")
                 .maxRetries(5)
-                .modelName(OpenAiChatModelName.GPT_3_5_TURBO)
+                .modelName(OpenAiChatModelName.GPT_4_O_MINI)
                 .logRequests(Boolean.TRUE)
                 .logResponses(Boolean.TRUE)
                 .maxTokens(1000)
