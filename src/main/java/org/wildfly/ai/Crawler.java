@@ -73,7 +73,6 @@ public class Crawler {
                 .maxRetries(20)
                 .timeout(Duration.ofSeconds(500))
                 .build();*/
-       
         EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel();
 
         EmbeddingStore<TextSegment> jsonStore = EmbeddingStoreFactory.createEmbeddingStore(myDocs, embeddingModel);
@@ -81,8 +80,10 @@ public class Crawler {
         ((InMemoryEmbeddingStore) jsonStore).serializeToFile(file);
         System.out.println("Embeddings stored into " + file.toAbsolutePath());
         //Filling weaviate
-        EmbeddingStore<TextSegment> store = EmbeddingStoreFactory.createWeaviateEmbeddingStore(myDocs, embeddingModel,
-                List.of("url", "language", "parent_url", "file_name", "file_path", "title", "subtitle"));
+//        EmbeddingStore<TextSegment> store = EmbeddingStoreFactory.createWeaviateEmbeddingStore(myDocs, embeddingModel,
+//                List.of("url", "language", "parent_url", "file_name", "file_path", "title", "subtitle"));
+        //Filling neo4j
+         EmbeddingStore<TextSegment> neo4jStore = EmbeddingStoreFactory.createNeo4jEmbeddingStore(myDocs, embeddingModel);
     }
 
     private static CrawlController createController(String name, String baseUrl) throws Exception {

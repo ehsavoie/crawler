@@ -11,6 +11,7 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
+import dev.langchain4j.store.embedding.neo4j.Neo4jEmbeddingStore;
 import dev.langchain4j.store.embedding.weaviate.WeaviateEmbeddingStore;
 import java.nio.file.Path;
 import java.util.List;
@@ -48,6 +49,19 @@ public class EmbeddingStoreFactory {
                 .avoidDups(true)
                 .consistencyLevel("ALL")
                 .metadataKeys(metadata)
+                .build();
+        EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
+                .documentSplitter(DocumentSplitters.recursive(500, 100))
+                .embeddingModel(embeddingModel)
+                .embeddingStore(embeddingStore)
+                .build();
+        ingestor.ingest(documents);
+        return embeddingStore;
+    }
+    public static EmbeddingStore<TextSegment> createNeo4jEmbeddingStore(List<Document> documents, EmbeddingModel embeddingModel) {
+        EmbeddingStore<TextSegment> embeddingStore = Neo4jEmbeddingStore.builder()
+                .withBasicAuth("neo4j://localhost:7687", "neo4j", "neo4jpassword")
+                .dimension(384)
                 .build();
         EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
                 .documentSplitter(DocumentSplitters.recursive(500, 100))
