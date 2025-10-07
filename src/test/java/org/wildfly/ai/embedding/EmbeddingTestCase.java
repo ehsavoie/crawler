@@ -9,7 +9,7 @@ import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.openai.OpenAiChatModel;
@@ -32,6 +32,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import dev.langchain4j.model.embedding.onnx.allminilml6v2.AllMiniLmL6V2EmbeddingModel;
+import dev.langchain4j.model.ollama.OllamaChatModel;
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.wildfly.ai.document.loader.WildFlyHtmlContent;
 import org.wildfly.ai.document.parser.HtmlDocumentParser;
@@ -81,21 +83,21 @@ public class EmbeddingTestCase {
 
 //        String ollamaUrl = "http://ollama-mchomaredhatcom.apps.ai-hackathon.qic7.p1.openshiftapps.com";
 //        String modelName = "7b-text-q2_Kchat";
-//        ChatLanguageModel model = OllamaChatModel.builder()
-//                .baseUrl(ollamaUrl)
-//                .modelName(modelName)
-//                .timeout(Duration.ofSeconds(240))
-//                .build();
-
-        ChatLanguageModel model = OpenAiChatModel
-                .builder()
-                .apiKey("demo")
-                .maxRetries(5)
-                .modelName(OpenAiChatModelName.GPT_4_O_MINI)
-                .logRequests(Boolean.TRUE)
-                .logResponses(Boolean.TRUE)
-                .maxTokens(1000)
+        ChatModel model = OllamaChatModel.builder()
+                .baseUrl(ollamaUrl)
+                .modelName(modelName)
+                .timeout(Duration.ofSeconds(240))
                 .build();
+
+//        ChatModel model = OpenAiChatModel
+//                .builder()
+//                .apiKey("demo")
+//                .maxRetries(5)
+//                .modelName(OpenAiChatModelName.GPT_4_O_MINI)
+//                .logRequests(Boolean.TRUE)
+//                .logResponses(Boolean.TRUE)
+//                .maxTokens(1000)
+//                .build();
         String question = "How do I set up a ConnectionFactory to a remote JMS broker ?";
         List<Content> ragContents = contentRetriever.retrieve(Query.from(question));
 
@@ -132,7 +134,7 @@ public class EmbeddingTestCase {
         }
 
         ConversationalRetrievalChain chain = ConversationalRetrievalChain.builder()
-                .chatLanguageModel(model)
+                .chatModel(model)
                 .retrievalAugmentor(DefaultRetrievalAugmentor.builder()
                         .contentInjector(DefaultContentInjector.builder()
                                 .promptTemplate(PromptTemplate.from(promptTemplate2))
@@ -164,7 +166,7 @@ public class EmbeddingTestCase {
                 .maxResults(2) // on each interaction we will retrieve the 2 most relevant segments
                 .minScore(0.5) // we want to retrieve segments at least somewhat similar to user query
                 .build();
-        ChatLanguageModel model = OpenAiChatModel
+        ChatModel model = OpenAiChatModel
                 .builder()
                 .apiKey("demo")
                 .maxRetries(5)
@@ -197,7 +199,7 @@ public class EmbeddingTestCase {
         }
 
         ConversationalRetrievalChain chain = ConversationalRetrievalChain.builder()
-                .chatLanguageModel(model)
+                .chatModel(model)
                 .retrievalAugmentor(DefaultRetrievalAugmentor.builder()
                         .contentInjector(DefaultContentInjector.builder()
                                 .promptTemplate(PromptTemplate.from(promptTemplate2))

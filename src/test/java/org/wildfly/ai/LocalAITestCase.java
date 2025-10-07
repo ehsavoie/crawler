@@ -4,7 +4,7 @@
  */
 package org.wildfly.ai;
 
-import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.localai.LocalAiChatModel;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -20,13 +20,13 @@ public class LocalAITestCase {
 
     @Test
     public void testHelloWorld() {
-        ChatLanguageModel model = LocalAiChatModel.builder()
+        ChatModel model = LocalAiChatModel.builder()
                 .baseUrl("http://localhost:8080")
                 .modelName("mixtral-instruct")
                 .temperature(0.9)
                 .build();
 
-        String answer = model.generate("How are you?");
+        String answer = model.chat("How are you?");
         System.out.println(answer);
     }
 }

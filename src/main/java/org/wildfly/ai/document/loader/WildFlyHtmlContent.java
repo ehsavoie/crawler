@@ -88,11 +88,11 @@ public class WildFlyHtmlContent implements DocumentSource {
     @Override
     public Metadata metadata() {
         Metadata metadata = new Metadata();
-        metadata.add("url", getUrl());
-        metadata.add("language", getLanguage());
-        metadata.add("parent_url", getParentUrl());
-        metadata.add("file_name", getPath().getFileName().toString());
-        metadata.add("file_path", getPath().toString());
+        metadata.put("url", getUrl());
+        metadata.put("language", getLanguage());
+        metadata.put("parent_url", getParentUrl());
+        metadata.put("file_name", getPath().getFileName().toString());
+        metadata.put("file_path", getPath().toString());
         return metadata;
     }
 }

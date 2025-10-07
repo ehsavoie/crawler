@@ -46,7 +46,7 @@ public class HtmlDocumentParser {
                     if (text != null && !text.isBlank()) {
                         Metadata metadata = content.metadata().copy();
                         if (title != null) {
-                            metadata.add("title", title);
+                            metadata.put("title", title);
                         }
                         boolean found = false;
                         for (int i = parents.size() - 1; i >= 0; i--) {
@@ -55,11 +55,11 @@ public class HtmlDocumentParser {
                                 found = true;
                             }
                             if (found && parent.is(parentSelector)) {
-                                metadata.add("subtitle", parent.text());
+                                metadata.put("subtitle", parent.text());
                                 break;
                             }
                         }
-                        segments.add(new dev.langchain4j.data.document.Document(text, metadata));
+                        segments.add(dev.langchain4j.data.document.Document.from(text, metadata));
                     }
                 }
             }

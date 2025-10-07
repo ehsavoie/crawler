@@ -79,11 +79,15 @@ public class Crawler {
         Path file = Paths.get("docs-wildfly-embedding.json");
         ((InMemoryEmbeddingStore) jsonStore).serializeToFile(file);
         System.out.println("Embeddings stored into " + file.toAbsolutePath());
+        //Filling chroma 
+//        System.out.println("Prepating Chroma");
+//        EmbeddingStore<TextSegment> chroma = EmbeddingStoreFactory.createChromaDBEmbeddingStore(myDocs, embeddingModel);
+//        System.out.println("Chroma is filled");
         //Filling weaviate
 //        EmbeddingStore<TextSegment> store = EmbeddingStoreFactory.createWeaviateEmbeddingStore(myDocs, embeddingModel,
 //                List.of("url", "language", "parent_url", "file_name", "file_path", "title", "subtitle"));
-        //Filling neo4j
-         EmbeddingStore<TextSegment> neo4jStore = EmbeddingStoreFactory.createNeo4jEmbeddingStore(myDocs, embeddingModel);
+//Filling neo4j
+//         EmbeddingStore<TextSegment> neo4jStore = EmbeddingStoreFactory.createNeo4jEmbeddingStore(myDocs, embeddingModel);
     }
 
     private static CrawlController createController(String name, String baseUrl) throws Exception {

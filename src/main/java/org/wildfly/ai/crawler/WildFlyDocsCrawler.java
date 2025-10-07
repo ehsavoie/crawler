@@ -44,7 +44,7 @@ public class WildFlyDocsCrawler extends WebCrawler {
     public WildFlyDocsCrawler(Path basePath, String baseUrl, List<WildFlyHtmlContent> content) {
         this.basePath = basePath;
         this.baseUrl = baseUrl;
-        this.filter = Pattern.compile(baseUrl + "([1-9](\\.1)(\\.2)??|1[0-9](\\.1)?|2[0-9](\\.1)?|3[0-1])/.*");
+        this.filter = Pattern.compile(baseUrl + "([1-9](\\.1)(\\.2)??|1[0-9](\\.1)?|2[0-9](\\.1)?|3[0-5])/.*");
         this.content = content;
     }
 
